@@ -1,10 +1,12 @@
-import pandas as pd 
+import pandas as pd
 import os
-befor_data="data/raw"
-after_data="data\processed"
 
-# we need to map the lables into integers
-lable_map={
+# use this if you are using colab 
+before_data = "/content/data/raw"
+after_data  = "/content/data/processed"
+
+# label mapping
+label_map = {
     "pants-fire": 0,
     "false": 1,
     "barely-true": 2,
@@ -13,34 +15,56 @@ lable_map={
     "true": 5
 }
 
-COLS = ["id",
-    "label","statement","subject","speaker","speaker_job","state_info",
+# column names
+COLS = [
+    "id","label","statement","subject","speaker","speaker_job","state_info",
     "party","barely_true_counts","false_counts","half_true_counts",
     "mostly_true_counts","pants_on_fire_counts","context"
 ]
 
-# if you ara in local uncomment this 
-#def load_tsv_local(name_file):
-  #path=os.path.join(befor_data,name_file)
-  #df=pd_read_csv(path,sep="\t",header=None)
-  #df.columns=COLS
-  #return df
-def load_tsv(name):
-  df=pd.read_csv("train.tsv",sep="\t",header=None)
-  df.columns=COLS
-  return df
+# Load TSV file
+def load_tsv(name_file):
+    path = os.path.join(before_data, name_file)
+    df = pd.read_csv(path, sep="\t", header=None)
+    df.columns = COLS
+    return df
 
+# Clean dataframe
 def clean(df):
-  # only intrested in this 2
-  df =df["label","statement"]
-  # remove empty rows
-  df=df.dropna()
-  # remove duplicates in statments
-  df=df.drop_duplicates(subset=["statement"])
-  # remove spaces
-  df["statement"]=df["statement"].str.strip()
-  # map the labels
-  df["label"]=df["label"].map(lable_map)
-  # remove short statements 
-  df =df[df["statement"].str.len()>10]
-  return df
+    # we are intrested in only two columns
+    df = df[["label", "statement"]]
+
+    df = df.dropna()                                  # remove empty rows
+    df = df.drop_duplicates(subset=["statement"])      # remove duplicate texts
+    df["statement"] = df["statement"].str.strip()      # remove whitespace
+    df["label"] = df["label"].map(label_map)           # convert label strings → ints
+
+    # keep only statements longer than 10 chars
+    df = df[df["statement"].str.len() > 10]
+
+    return df
+
+def main():
+    # create output folder id it does not exist 
+    os.makedirs(after_data, exist_ok=True)
+
+    # correct file names
+    splits = ["train.tsv", "test.tsv", "valid.tsv"]
+
+    for split in splits:
+        print(f"Cleaning... {split}")
+
+        df = load_tsv(split)
+        df = clean(df)
+
+        save_name = split.replace(".tsv", "_clean.tsv")
+        df.to_csv(os.path.join(after_data, save_name), index=False)
+
+        print(f"Cleaned {split}")
+        print(df.head())
+        print(df["label"].value_counts())
+        print("-" * 40)
+
+# correct main check
+if __name__ == "__main__":
+    main()
