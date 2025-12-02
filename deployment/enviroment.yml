@@ -1,0 +1,20 @@
+name: hf-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy==1.26.4
+  - pandas
+  - scikit-learn
+  - pip:
+      - "torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu"
+      - transformers==4.41.2
+      - datasets
+      - azureml-core
+      - azureml-defaults
+      - azureml-mlflow
+      - mlflow
+      - tqdm
+      - tokenizers

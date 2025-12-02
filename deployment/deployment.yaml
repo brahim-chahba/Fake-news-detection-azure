@@ -1,0 +1,16 @@
+$schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.schema.json
+name: fake-news-detc-distilbert-1
+endpoint_name: ml-fakenews-workspace-endp
+model: 
+  name: fake-news-detc-distilbert
+  version: 1
+environment:
+  conda_file: environment.yml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu22.04:latest
+code_configuration:
+  code: .
+  scoring_script: score.py
+instance_type: Standard_D4s_v3
+instance_count: 1
+request_settings:
+  request_timeout_seconds: 300
